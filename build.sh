@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc src/main.c -o main -std=c99 -Wall -Werror -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+gcc src/main.c -o snake -std=c99 -Wall -Werror -L./lib/libraylib.a -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
