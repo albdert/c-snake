@@ -19,6 +19,10 @@ bool dead = false;
 bool pause = false;
 bool quit = false;
 
+// settings
+bool warp = false;
+bool fast = false;
+
 typedef enum {
     UP,
     DOWN,
@@ -31,6 +35,14 @@ typedef enum {
     QUIT,
     RESUME
 } ButtonID;
+
+typedef struct {
+    Rectangle bounds;
+    Color c1;
+    Color c2;
+    int border;
+    char *text;
+} Checkbox;
 
 typedef struct {
     Rectangle bounds;
@@ -86,10 +98,12 @@ void moveSnake(Snake *snake) {
         case RIGHT: snake->segments[0].x+=SIZE; break;
     }
 
-    if (snake->segments[0].y<0) { snake->segments[0].y=SIZE*(COLS-1); }
-    if (snake->segments[0].y>=SCREEN_H) { snake->segments[0].y=0; }
-    if (snake->segments[0].x<0) { snake->segments[0].x=SIZE*(ROWS-1); }
-    if (snake->segments[0].x>=SCREEN_W) { snake->segments[0].x=0; }
+    if (warp) {
+        if (snake->segments[0].y<0) { snake->segments[0].y=SIZE*(COLS-1); }
+        if (snake->segments[0].y>=SCREEN_H) { snake->segments[0].y=0; }
+        if (snake->segments[0].x<0) { snake->segments[0].x=SIZE*(ROWS-1); }
+        if (snake->segments[0].x>=SCREEN_W) { snake->segments[0].x=0; }
+    }
 
     for (int i=1; i<snake->len; i++) {
         float newx = snake->segments[i].x;
@@ -218,6 +232,12 @@ void pausemenu(Button b[], int i[], int n) {
     DrawText("Paused", (SCREEN_W/2)-(textOffsetX), (SCREEN_H/6), SIZE*4, DARKGRAY);
     drawButtons(b, i, n); 
 }
+void settings(Button b[], int i[], int n) {
+    int textOffsetX = MeasureText("Settings", SIZE*4)/2;
+    DrawRectangle(0,0,SCREEN_W,SCREEN_H, (Color){255,255,255,128});
+    DrawText("Settings", (SCREEN_W/2)-(textOffsetX), (SCREEN_H/6), SIZE*4, DARKGRAY);
+    drawButtons(b, i, n); 
+}
 
 void tick(int *tickCnt) {
     (*tickCnt) = ((*tickCnt)+1) % tickrate;
@@ -268,6 +288,10 @@ void checkCollision(Snake *snake) {
     Rectangle head = snake->segments[0];
     for (int i=1; i<snake->len; i++) {
         if (CheckCollisionRecs(head, snake->segments[i])) {
+            dead = true;
+            menu = true;
+        }
+        if ( !warp && (head.x<0 || head.x>=SCREEN_W || head.y<0 || head.y>=SCREEN_H) ) {
             dead = true;
             menu = true;
         }
